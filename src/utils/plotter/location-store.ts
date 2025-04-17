@@ -2,7 +2,7 @@
 import type { GerberNode } from '../parser'
 import { GRAPHIC, TRAILING } from '../parser'
 
-import type { PlotOptions } from './options'
+import type {PlotOptions} from './options'
 
 export interface Point {
   x: number
@@ -35,8 +35,8 @@ interface LocationStoreState {
 }
 
 const LocationStorePrototype: LocationStore & LocationStoreState = {
-  _DEFAULT_ARC_OFFSETS: { i: 0, j: 0, a: 0 },
-  _previousPoint: { x: 0, y: 0 },
+  _DEFAULT_ARC_OFFSETS: {i: 0, j: 0, a: 0},
+  _previousPoint: {x: 0, y: 0},
 
   use(node: GerberNode, options: PlotOptions): Location {
     let arcOffsets = this._DEFAULT_ARC_OFFSETS
@@ -44,7 +44,7 @@ const LocationStorePrototype: LocationStore & LocationStoreState = {
     let endPoint = startPoint
 
     if (node.type === GRAPHIC) {
-      const { coordinates } = node
+      const {coordinates} = node
       const x0 = parseCoordinate(coordinates.x0, startPoint.x, options)
       const y0 = parseCoordinate(coordinates.y0, startPoint.y, options)
       const x = parseCoordinate(coordinates.x, x0, options)
@@ -54,20 +54,20 @@ const LocationStorePrototype: LocationStore & LocationStoreState = {
       const a = parseCoordinate(coordinates.a, 0, options)
 
       if (startPoint.x !== x0 || startPoint.y !== y0) {
-        startPoint = { x: x0, y: y0 }
+        startPoint = {x: x0, y: y0}
       }
 
       if (endPoint.x !== x || endPoint.y !== y) {
-        endPoint = { x, y }
+        endPoint = {x, y}
       }
 
       if (arcCenterXOffset !== 0 || arcCenterYOffset !== 0 || a !== 0) {
-        arcOffsets = { i: arcCenterXOffset, j: arcCenterYOffset, a }
+        arcOffsets = {i: arcCenterXOffset, j: arcCenterYOffset, a}
       }
     }
 
     this._previousPoint = endPoint
-    return { startPoint, endPoint, arcOffsets }
+    return {startPoint, endPoint, arcOffsets}
   },
 }
 
@@ -84,7 +84,7 @@ function parseCoordinate(
     return Number(coordinate)
   }
 
-  const { coordinateFormat, zeroSuppression } = options
+  const {coordinateFormat, zeroSuppression} = options
   const [integerPlaces, decimalPlaces] = coordinateFormat
 
   const [sign, signlessCoordinate] =
