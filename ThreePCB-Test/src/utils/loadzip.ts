@@ -5,10 +5,11 @@ import {
     SIDE_TOP,
     TYPE_COPPER,
     TYPE_DRILL,
+    TYPE_OUTLINE,
     TYPE_SILKSCREEN,
     TYPE_SOLDERMASK,
     TYPE_SOLDERPASTE,
-} from '../../../dist'
+} from 'three-pcb'
 
 export const loadZip = async (file: File): Promise<GerberData> => {
     let GerberData: GerberData | null = {
@@ -77,11 +78,12 @@ export const loadZip = async (file: File): Promise<GerberData> => {
         if (layerInfo.type == TYPE_DRILL) {
             GerberData.Drill.push(_relativePath)
         }
-        if (layerInfo.type == TYPE_COPPER && layerInfo.side == SIDE_BOTTOM) {
+        if (layerInfo.type == TYPE_OUTLINE) {
             GerberData.Outline = _relativePath
         }
     }
 
+    console.log(GerberData)
     return GerberData
 }
 

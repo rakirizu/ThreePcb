@@ -14,6 +14,7 @@ export interface colorSettings {
     SolderMask: number
     SolderPaste: number
     Silkscreen: number
+    BaseBoard: number
 }
 
 export const defaultColor: colorSettings = {
@@ -21,6 +22,7 @@ export const defaultColor: colorSettings = {
     SolderMask: 0x6a8d52,
     SolderPaste: 0xb2b6b6,
     Silkscreen: 0xffffff,
+    BaseBoard: 0xbfa782,
 }
 export interface LaminarStructure {
     //铜层厚度
@@ -30,7 +32,7 @@ export interface LaminarStructure {
     //锡膏层
     SolderPaste: number
     //基板
-    Substrate: number
+    Total: number
     //丝印层
     Silkscreen: number
 }
@@ -38,6 +40,6 @@ export const DefaultLaminar: LaminarStructure = {
     Copper: 0.035,
     SolderMask: 0.01,
     SolderPaste: 0.01,
-    Substrate: 0.87,
+    Total: 1.6,
     Silkscreen: 0.01,
 }

@@ -1,16 +1,16 @@
 import * as THREE from 'three'
 import {
-    CIRCLE,
     LAYERED_SHAPE,
-    POLYGON,
-    RECTANGLE,
+    PLOT_CIRCLE,
+    PLOT_POLYGON,
+    PLOT_RECTANGLE,
     type CircleShape,
     type ImageShape,
     type LayeredShape,
     type PolygonShape,
     type Position,
     type RectangleShape,
-} from 'three-pcb'
+} from '../plotter'
 import { extrudeSettings } from './config'
 const renderImageShapeCircle = (shapeCircle: CircleShape): THREE.CylinderGeometry => {
     const geometry = new THREE.CylinderGeometry(shapeCircle.r, shapeCircle.r, 1)
@@ -53,9 +53,9 @@ const renderImageShapeRectangle = (shapeRectangle: RectangleShape): THREE.Buffer
                 shapeRectangle.y,
                 shapeRectangle.xSize,
                 shapeRectangle.ySize,
-                shapeRectangle.r,
+                shapeRectangle.r
             ),
-            extrudeSettings,
+            extrudeSettings
         )
         geometry.translate(0, 0, extrudeSettings.depth ? -extrudeSettings.depth / 2 : -0.5)
     } else {
@@ -99,12 +99,12 @@ const renderImageShapePolygon = (points: Position[]): THREE.BufferGeometry => {
 export interface renderImageShapeResult {
     erase: boolean
     geometry: THREE.BufferGeometry
-    type: typeof CIRCLE | typeof RECTANGLE | typeof POLYGON
+    type: typeof PLOT_CIRCLE | typeof PLOT_RECTANGLE | typeof PLOT_POLYGON
 }
 export const renderImageShape = (el: ImageShape): renderImageShapeResult[] => {
     let geometry: renderImageShapeResult[] = []
     switch (el.shape.type) {
-        case CIRCLE:
+        case PLOT_CIRCLE:
             const shapeCircle = el.shape as CircleShape
             geometry.push({
                 erase: false,
@@ -113,20 +113,20 @@ export const renderImageShape = (el: ImageShape): renderImageShapeResult[] => {
             })
 
             break
-        case RECTANGLE:
+        case PLOT_RECTANGLE:
             const shapeRectangle = el.shape as RectangleShape
             const buildShape = renderImageShapeRectangle(shapeRectangle)
             if (shapeRectangle.r) {
                 geometry.push({
                     erase: false,
                     geometry: buildShape,
-                    type: POLYGON,
+                    type: PLOT_POLYGON,
                 })
             } else {
                 geometry.push({
                     erase: false,
                     geometry: buildShape,
-                    type: RECTANGLE,
+                    type: PLOT_RECTANGLE,
                 })
             }
 
@@ -138,7 +138,7 @@ export const renderImageShape = (el: ImageShape): renderImageShapeResult[] => {
                     console.warn('[ThreePCB] Invalid layered shape (erase):', shape)
                 }
                 switch (shape.type) {
-                    case CIRCLE:
+                    case PLOT_CIRCLE:
                         const shapeLayeredCircle = shape as CircleShape
                         geometry.push({
                             erase: false,
@@ -146,7 +146,7 @@ export const renderImageShape = (el: ImageShape): renderImageShapeResult[] => {
                             type: shape.type,
                         })
                         break
-                    case RECTANGLE:
+                    case PLOT_RECTANGLE:
                         const shapeLayeredRectangle = shape as RectangleShape
                         geometry.push({
                             erase: false,
@@ -154,9 +154,8 @@ export const renderImageShape = (el: ImageShape): renderImageShapeResult[] => {
                             type: shape.type,
                         })
                         break
-                    case POLYGON:
+                    case PLOT_POLYGON:
                         const shapeLayeredPolygon = shape as PolygonShape
-                        console.log(shapeLayeredPolygon.points)
                         geometry.push({
                             erase: false,
                             geometry: renderImageShapePolygon(shapeLayeredPolygon.points),

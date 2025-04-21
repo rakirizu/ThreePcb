@@ -23,20 +23,27 @@ export function plotSegment(
 
 export function plotContour(segments: Tree.PathSegment[]): Tree.ImageGraphicBase | undefined {
     if (segments.length > 0) {
+        console.log('plotContour', segments)
+
         return { type: Tree.IMAGE_REGION, segments }
     }
 }
 
 export function plotLine(
     segment: Tree.PathSegment,
-    tool: Tool | undefined
-): Tree.ImageGraphicBase | undefined {
+    tool: Tool | undefined,
+    outline: boolean = false
+): Tree.ImageGraphicBase | Tree.ImagePath | undefined {
     if (tool?.type === SIMPLE_TOOL && tool.shape.type === Tree.PLOT_CIRCLE) {
-        // return {
-        //   type: Tree.IMAGE_PATH,
-        //   width: tool.shape.diameter,
-        // }
-        return plotContour(contourizeCirclePath(segment, tool.shape.diameter))
+        if (outline) {
+            return {
+                type: Tree.IMAGE_PATH,
+                width: tool.shape.diameter,
+                segments: [segment],
+            } as Tree.ImagePath
+        } else {
+            return plotContour(contourizeCirclePath(segment, tool.shape.diameter))
+        }
     }
 
     if (tool?.type === SIMPLE_TOOL && tool.shape.type === Tree.PLOT_RECTANGLE) {

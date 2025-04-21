@@ -1,64 +1,33 @@
 import * as THREE from 'three'
-import { ARC, LINE, type ImagePath, type PathArcSegment, type PathLineSegment } from 'three-pcb'
+import {
+    ARC,
+    PLOT_LINE,
+    type ImagePath,
+    type PathArcSegment,
+    type PathLineSegment,
+} from '../plotter'
 
-const renderImagePathLine = (el: PathLineSegment, width: number): THREE.Curve<any> => {
-    if (el.start[0] > el.end[0]) {
-        el.start[0] = el.start[0] + width
-    }
-    if (el.end[0] > el.start[0]) {
-        el.end[0] = el.end[0] + width
-    }
-
-    if (el.start[1] > el.end[1]) {
-        el.start[1] = el.start[1] + width
-    }
-    if (el.end[1] > el.start[1]) {
-        el.end[1] = el.end[1] + width
-    }
-
-    if (el.start[0] < el.end[0]) {
-        el.start[0] = el.start[0] - width
-    }
-    if (el.end[0] < el.start[0]) {
-        el.end[0] = el.end[0] - width
-    }
-
-    if (el.start[1] < el.end[1]) {
-        el.start[1] = el.start[1] - width
-    }
-    if (el.end[1] < el.start[1]) {
-        el.end[1] = el.end[1] - width
-    }
-
+const renderImagePathLine = (el: PathLineSegment): THREE.Curve<any> => {
     return new THREE.LineCurve(
         new THREE.Vector2(el.start[0], el.start[1]),
-        new THREE.Vector2(el.end[0], el.end[1]),
+        new THREE.Vector2(el.end[0], el.end[1])
     )
 }
 
 const renderImagePathArc = (el: PathArcSegment): THREE.Curve<any> => {
-    let start,
-        end = 0
-    if (el.start[2] > el.end[2]) {
-        start = el.end[2]
-        end = el.start[2]
-    } else {
-        start = el.start[2]
-        end = el.end[2]
-    }
     return new THREE.EllipseCurve(
         el.center[0],
         el.center[1],
         el.radius,
         el.radius,
-        start,
-        end,
-        false,
+        el.start[2],
+        el.end[2],
+        el.start[2] > el.end[2]
     )
 }
 
 export const renderImagePath = (el: ImagePath): THREE.BufferGeometry[] => {
-    let geometries = []
+    let geometries: THREE.ExtrudeGeometry[] = []
     // 3. 定义矩形截面（width: 宽度，height: 厚度）
     const width = 1,
         height = el.width
@@ -73,9 +42,9 @@ export const renderImagePath = (el: ImagePath): THREE.BufferGeometry[] => {
     for (const key in el.segments) {
         if (Object.prototype.hasOwnProperty.call(el.segments, key)) {
             const element = el.segments[key]
-            let curve = null
-            if (element.type == LINE) {
-                curve = renderImagePathLine(element, el.width)
+            let curve: THREE.Curve<any> | null = null
+            if (element.type == PLOT_LINE) {
+                curve = renderImagePathLine(element)
             } else if (element.type == ARC) {
                 curve = renderImagePathArc(element)
             } else {
@@ -87,7 +56,7 @@ export const renderImagePath = (el: ImagePath): THREE.BufferGeometry[] => {
 
             const spline = new THREE.CatmullRomCurve3(vectorPoints, false, 'catmullrom', 2)
             const extrudeSettings = {
-                steps: 10,
+                steps: 1,
                 bevelEnabled: true,
                 extrudePath: spline,
             }

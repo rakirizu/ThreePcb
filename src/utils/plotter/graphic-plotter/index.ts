@@ -37,9 +37,10 @@ export interface GraphicPlotter {
     plot: (node: GerberNode, tool: Tool | undefined, location: Location) => Tree.ImageGraphic[]
 }
 
-export function createGraphicPlotter(filetype: Filetype): GraphicPlotter {
-    const plotter = Object.create(GraphicPlotterPrototype)
-
+export function createGraphicPlotter(filetype: Filetype, isOutline: boolean): GraphicPlotter {
+    let prototype = { ...GraphicPlotterPrototype }
+    prototype._isOutline = isOutline
+    const plotter = Object.create(prototype)
     return filetype === DRILL ? Object.assign(plotter, DrillGraphicPlotterTrait) : plotter
 }
 
@@ -50,7 +51,7 @@ interface GraphicPlotterImpl extends GraphicPlotter {
     _regionMode: boolean
     _defaultGraphic: GraphicType | undefined
     _polarity: typeof DARK | typeof CLEAR
-
+    _isOutline: boolean
     _setGraphicState: (node: GerberNode) => void
 
     _plotCurrentPath: (
@@ -73,6 +74,7 @@ const GraphicPlotterPrototype: GraphicPlotterImpl = {
     _regionMode: false,
     _defaultGraphic: undefined,
     _polarity: DARK,
+    _isOutline: false,
 
     plot(node: GerberNode, tool: Tool | undefined, location: Location): Tree.ImageGraphic[] {
         const graphics: Tree.ImageGraphic[] = []
@@ -131,7 +133,8 @@ const GraphicPlotterPrototype: GraphicPlotterImpl = {
         if (nextGraphicType === SEGMENT && !this._regionMode) {
             const pathGraphic = plotLine(
                 plotSegment(location, this._arcDirection, this._ambiguousArcCenter),
-                tool
+                tool,
+                this._isOutline
             )
 
             if (pathGraphic !== undefined) {
@@ -144,6 +147,7 @@ const GraphicPlotterPrototype: GraphicPlotterImpl = {
         }
 
         if (nextGraphicType === SLOT) {
+            console.log('nextGraphicType === SLOT')
             const slotPathGraphic = plotLine(plotSegment(location), tool)
 
             if (slotPathGraphic !== undefined) {
@@ -213,6 +217,7 @@ const GraphicPlotterPrototype: GraphicPlotterImpl = {
             nextGraphicType === SHAPE ||
             node.type === LOAD_POLARITY
         ) {
+            console.log('_plotCurrentPath', this._currentPath)
             const pathGraphic = plotContour(this._currentPath.segments)
 
             this._currentPath = undefined

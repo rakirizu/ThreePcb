@@ -1,69 +1,141 @@
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { Render } from './render'
+import { BufferGeometryUtils } from 'three/examples/jsm/Addons.js'
+import {
+    IMAGE_PATH,
+    IMAGE_REGION,
+    IMAGE_SHAPE,
+    PLOT_POLYGON,
+    type ImagePath,
+    type ImageRegion,
+    type ImageShape,
+    type ImageTree,
+} from '../plotter'
+import { extrudeSettings } from './config'
+import { renderImageOutline } from './outline'
+import { renderImagePath } from './path'
+import { renderImageRegion } from './region'
+import { renderImageShape } from './shape'
+export * from './config'
+export * from './path'
+export * from './region'
+export * from './shape'
+export * from './threejs'
+// let reNum = 0
+export const render = (
+    gerberData: ImageTree,
+    _color: THREE.ColorRepresentation,
+    _progress: (number: number) => void = () => {},
+    outline: boolean
+): THREE.Group => {
+    let region: THREE.BufferGeometry[] = []
+    let path: THREE.BufferGeometry[] = []
+    let shape: THREE.BufferGeometry[] = []
+    let shapeReglon: THREE.BufferGeometry[] = []
+    let current = 0
+    _progress(current)
+    const outlineShape = outline ? new THREE.Shape() : null
+    for (let index = 0; index < gerberData.children.length; index++) {
+        const element = gerberData.children[index]
+        if (Math.ceil((index / gerberData.children.length) * 100) != current) {
+            current = Math.ceil((index / gerberData.children.length) * 100)
+            _progress(current)
+        }
 
-export interface RenderInitParams {
-    AddResizeListener?: boolean
-    AddAnimationLoop?: boolean
-    AddAxesHelper?: boolean
-    AddOrbitControls?: boolean
-}
-export function NewRenderByElement(el: HTMLDivElement, param: RenderInitParams): Render {
-    const scene = new THREE.Scene()
-    scene.background = new THREE.Color(0xeeeeee)
-    const renderer = new THREE.WebGLRenderer({ antialias: true })
-    renderer.setSize(el.clientWidth, el.clientHeight)
-    var width = el.clientWidth //窗口宽度
-    var height = el.clientHeight //窗口高度
-    var k = width / height //窗口宽高比
-    var s = 500 //三维场景显示范围控制系数，系数越大，显示的范围越大
+        if (outlineShape) {
+            renderImageOutline(element, outlineShape)
+            continue
+        }
 
-    const camera = new THREE.OrthographicCamera(-s * k, s * k, s, -s, 0.2, 3000)
-    camera.position.z = 5
-    camera.position.y = 0
-    camera.position.x = 0
-    camera.lookAt(0, 0, 0)
-    // const camera = new THREE.PerspectiveCamera(75, el.clientWidth / el.clientHeight, 0.1, 1000)
-
-    // camera.position.z = 5
-    // camera.position.y = 0
-    // camera.position.x = 0
-    // camera.lookAt(0, 0, 0)
-    scene.add(camera)
-
-    if (param.AddResizeListener) {
-        window.addEventListener('resize', () => {
-            // camera.aspect = el.clientWidth / el.clientHeight
-            camera.updateProjectionMatrix()
-            renderer.setSize(el.clientWidth, el.clientHeight)
-        })
-    }
-    if (param.AddAxesHelper) {
-        scene.add(new THREE.AxesHelper(10))
-    }
-    let con: OrbitControls | null = null
-    if (param.AddOrbitControls) {
-        con = new OrbitControls(camera, renderer.domElement)
-        con.update()
-    }
-    if (param.AddAnimationLoop) {
-        renderer.setAnimationLoop(() => {
-            renderer.render(scene, camera)
-            if (con) {
-                con.update()
+        if (element.type == IMAGE_REGION) {
+            const geo = renderImageRegion(element as ImageRegion)
+            if (geo != null) {
+                region.push(geo)
             }
-        })
+            continue
+        }
+        if (element.type == IMAGE_PATH) {
+            const geo = renderImagePath(element as ImagePath)
+            path.push(...geo)
+            continue
+        }
+        if (element.type == IMAGE_SHAPE) {
+            const geo = renderImageShape(element as ImageShape)
+            geo.forEach((item) => {
+                if (item.type == PLOT_POLYGON) {
+                    shapeReglon.push(item.geometry)
+                } else {
+                    shape.push(item.geometry)
+                }
+            })
+
+            continue
+        }
     }
-    //环境光
-    var ambient = new THREE.AmbientLight(0xffffff)
-    scene.add(ambient)
-    el.appendChild(renderer.domElement)
-    return NewRenderByThreeInterface(scene, camera, renderer)
-}
-export function NewRenderByThreeInterface(
-    scene: THREE.Scene,
-    camera: THREE.PerspectiveCamera | THREE.OrthographicCamera,
-    renderer: THREE.WebGLRenderer
-): Render {
-    return new Render(scene, camera, renderer)
+
+    const group = new THREE.Group()
+
+    if (outlineShape) {
+        const geometry = new THREE.ExtrudeGeometry(outlineShape, extrudeSettings)
+        geometry.translate(0, 0, -0.5)
+        region.push(geometry)
+    }
+    const material = new THREE.MeshStandardMaterial({
+        color: _color,
+    })
+
+    // const material2 = new THREE.MeshStandardMaterial({
+    //     color: 0x00ffff,
+    // })
+    // const material3 = new THREE.MeshStandardMaterial({
+    //     color: 0xff00ff,
+    // })
+    // const material4 = new THREE.MeshStandardMaterial({
+    //     color: 0xff0000,
+    // })
+
+    if (region.length > 0) {
+        const mergedRegion = BufferGeometryUtils.mergeGeometries(region, false)
+        const mesh = new THREE.Mesh(mergedRegion, material)
+        mergedRegion.dispose()
+        group.add(mesh)
+        for (const geometry of region) {
+            geometry.dispose()
+        }
+        region = []
+    }
+
+    if (path.length > 0) {
+        const mergedPath = BufferGeometryUtils.mergeGeometries(path, false)
+        const pathMesh = new THREE.Mesh(mergedPath, material)
+        group.add(pathMesh)
+        for (const geometry of path) {
+            geometry.dispose()
+        }
+        path = []
+        mergedPath.dispose()
+    }
+
+    if (shape.length > 0) {
+        const mergedShape = BufferGeometryUtils.mergeGeometries(shape, false)
+        const shapeMesh = new THREE.Mesh(mergedShape, material)
+
+        group.add(shapeMesh)
+        for (const geometry of shape) {
+            geometry.dispose()
+        }
+        shape = []
+        mergedShape.dispose()
+    }
+    if (shapeReglon.length > 0) {
+        const mergedShapeRe = BufferGeometryUtils.mergeGeometries(shapeReglon, false)
+        const shapeMeshRe = new THREE.Mesh(mergedShapeRe, material)
+        group.add(shapeMeshRe)
+        for (const geometry of shapeReglon) {
+            geometry.dispose()
+        }
+        shapeReglon = []
+        mergedShapeRe.dispose()
+    }
+    material.dispose()
+    return group
 }

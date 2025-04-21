@@ -1,8 +1,7 @@
 import * as THREE from 'three'
-import { ARC, LINE, type ImageRegion, type PathArcSegment } from 'three-pcb'
+import { ARC, PLOT_LINE, type ImageRegion, type PathArcSegment } from '../plotter'
 import { extrudeSettings } from './config'
-let has = false
-export const renderImageRegion = (el: ImageRegion): THREE.BufferGeometry => {
+export const renderImageRegion = (el: ImageRegion): THREE.BufferGeometry | null => {
     const heartShape = new THREE.Shape()
     heartShape.moveTo(el.segments[0].start[0], el.segments[0].start[1])
     for (let index = 0; index < el.segments.length; index++) {
@@ -15,31 +14,18 @@ export const renderImageRegion = (el: ImageRegion): THREE.BufferGeometry => {
 
         if (element.type == ARC) {
             const regionData = element as PathArcSegment
-            if (!has) {
-                has = true
-                console.log(regionData)
-            }
-
-            // let start, end: number
-            // if (regionData.start[2] > regionData.end[2]) {
-            //     start = regionData.end[2]
-            //     end = regionData.start[2]
-            // } else {
-            //     start = regionData.start[2]
-            //     end = regionData.end[2]
-            // }
-            console.log('!!!', regionData)
-
             heartShape.absarc(
                 regionData.center[0],
                 regionData.center[1],
                 regionData.radius,
                 regionData.start[2],
                 regionData.end[2],
-                regionData.start[2] > regionData.end[2],
+                regionData.start[2] > regionData.end[2]
             )
-        } else if (element.type == LINE) {
+        } else if (element.type == PLOT_LINE) {
             heartShape.lineTo(element.end[0], element.end[1])
+        } else {
+            console.warn('[Three-PCB] invalid region type', element)
         }
     }
     // const spline = createRoundedPath(vectorPoints, 3)

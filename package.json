@@ -1,43 +1,53 @@
 {
-  "name": "three-pcb",
-  "private": false,
-  "version": "0.0.3",
-  "type": "module",
-  "main": "dist/index.cjs",
-  "module": "dist/index.mjs",
-  "browser": "dist/index.min.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "package.json",
-    "README.md",
-    "dist"
-  ],
-  "author": "Kirizu <kirizu@kirizu.dev>",
-  "license": "MIT",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@types/three": "^0.175.0",
-    "moo": "^0.5.2",
-    "testdouble": "^3.20.2",
-    "testdouble-vitest": "^0.3.0",
-    "three": "^0.175.0",
-    "vite-plugin-dts": "^4.5.3",
-    "vue": "^3.5.13"
-  },
-  "devDependencies": {
-    "@preact/preset-vite": "^2.10.1",
-    "@types/moo": "^0.5.10",
-    "@types/unist": "^3.0.3",
-    "@vitejs/plugin-vue": "^5.2.1",
-    "@vue/tsconfig": "^0.7.0",
-    "typescript": "~5.7.2",
-    "vite": "^6.2.0",
-    "vitest": "^3.1.1",
-    "vue-tsc": "^2.2.4"
-  },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+    "name": "three-pcb",
+    "private": false,
+    "version": "0.0.3",
+    "type": "module",
+    "main": "dist/utils/index.cjs",
+    "module": "dist/utils/index.es.mjs",
+    "browser": "dist/utils/index.umd.js",
+    "types": "dist/utils/index.d.ts",
+    "files": [
+        "package.json",
+        "README.md",
+        "dist"
+    ],
+    "author": "Kirizu <kirizu@kirizu.dev>",
+    "license": "MIT",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build --config vite.index.config.ts && vite build --config vite.worker.config.ts",
+        "preview": "vite preview"
+    },
+    "exports": {
+        ".": {
+            "types": "./dist/utils/index.d.ts",
+            "import": "./dist/utils/index.es.mjs",
+            "require": "./dist/utils/index.cjs"
+        },
+        "./worker/runner": {
+            "import": "./dist/worker/worker.umd.js",
+            "require": "./dist/worker/worker.umd.js"
+        },
+        "./worker/types": "./dist/worker/workerType.d.ts"
+    },
+    "dependencies": {
+        "@types/three": "^0.175.0",
+        "moo": "^0.5.2",
+        "testdouble": "^3.20.2",
+        "testdouble-vitest": "^0.3.0",
+        "three": "^0.175.0",
+        "vite-plugin-dts": "^4.5.3",
+        "vue": "^3.5.13"
+    },
+    "devDependencies": {
+        "@preact/preset-vite": "^2.10.1",
+        "@types/moo": "^0.5.10",
+        "@types/unist": "^3.0.3",
+        "@vitejs/plugin-vue": "^5.2.1",
+        "typescript": "~5.7.2",
+        "vite": "^6.2.0",
+        "vitest": "^3.1.1"
+    },
+    "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

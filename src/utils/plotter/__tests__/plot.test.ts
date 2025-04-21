@@ -102,7 +102,6 @@ describe('creating a plot tree', () => {
         td.when(boundingBox.fromGraphics([shape1, shape2])).thenReturn([1, 2, 3, 4])
 
         const result = subject.plot(tree)
-        console.log(result)
 
         expect(result).to.eql({
             type: Tree.IMAGE,
