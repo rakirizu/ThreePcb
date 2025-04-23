@@ -10,7 +10,6 @@ import * as Tree from '../tree'
 // for graphics and examples
 export function plotRectPath(segment: Tree.PathSegment, shape: Rectangle): Tree.ImageRegion {
     const shapes = segment.type === Tree.PLOT_LINE ? plotRectPathSegment(segment, shape) : []
-    console.log('plotRectPath', segment, shape)
     return { type: Tree.IMAGE_REGION, segments: shapes }
 }
 

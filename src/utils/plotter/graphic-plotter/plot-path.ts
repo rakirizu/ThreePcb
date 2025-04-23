@@ -23,8 +23,6 @@ export function plotSegment(
 
 export function plotContour(segments: Tree.PathSegment[]): Tree.ImageGraphicBase | undefined {
     if (segments.length > 0) {
-        console.log('plotContour', segments)
-
         return { type: Tree.IMAGE_REGION, segments }
     }
 }

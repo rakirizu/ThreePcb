@@ -7,6 +7,7 @@ export interface WorkerMessage {
         | WorkerMessagePlot
         | WorkerMessageRender
         | WorkerMessageParseAndPlotAndRender
+        | WorkerMessagePlotAndRenderDrill
 }
 
 export interface WorkerMessageParseAndPlotAndRender {
@@ -47,7 +48,6 @@ export interface WorkerMessagePlotResp {
 export interface gerberRenderOpt {
     _color: number
     _progress?: boolean
-    outline: boolean
 }
 
 export interface WorkerMessageRender {
@@ -55,6 +55,7 @@ export interface WorkerMessageRender {
     uuid: string
     data: ImageTree
     opt: gerberRenderOpt
+    outline: boolean
 }
 
 export interface WorkerMessageRenderResp {
@@ -68,6 +69,19 @@ export interface WorkerMessageRenderProgressResp {
     data: number
 }
 
+export interface WorkerMessagePlotAndRenderDrill {
+    mod: typeof ModPlotAndRenderDrill
+    uuid: string
+    data: string[]
+    opt: gerberRenderOpt
+}
+
+export interface WorkerMessagePlotAndRenderDrillResp {
+    mod: typeof ModPlotAndRenderDrill
+    uuid: string
+    data: THREE.Object3DJSON
+}
+
 export const ModParseAndPlotAndRender = 'parseAndPlotAndRender'
 
 export const ModParse = 'parse'
@@ -75,6 +89,7 @@ export const ModParse = 'parse'
 export const ModPlot = 'plot'
 
 export const ModRender = 'render'
+export const ModPlotAndRenderDrill = 'renderDrill'
 
 export const ModRenderProgress = 'renderProgress'
 
@@ -84,3 +99,4 @@ export type WorkerMessageResp =
     | WorkerMessageRenderResp
     | WorkerMessageRenderProgressResp
     | WorkerMessageParseAndPlotAndRenderResp
+    | WorkerMessagePlotAndRenderDrillResp

@@ -4,19 +4,21 @@ import {
     defaultColor,
     DefaultLaminar,
     NewRenderByElement,
-    render,
+    parse,
+    plot,
     Render,
     type RenderInitParams,
 } from 'three-pcb'
 import threeWorker from 'three-pcb/worker/runner?worker'
 import * as typed from 'three-pcb/worker/types'
 import { onMounted, ref, useTemplateRef } from 'vue'
+import { render as renderSource } from '../../src/utils/render'
 import { loadZip, loadZipFileData } from './utils/loadzip'
-import { parseAndPlot } from './utils/parse'
 import { assemblyPCB, type PCBRender } from './utils/pcb'
 const threeDom = useTemplateRef('testThree')
 let renderer: Render | null = null
 const parserWorker = [
+    new threeWorker(),
     new threeWorker(),
     new threeWorker(),
     new threeWorker(),
@@ -31,7 +33,6 @@ const doAss = () => {
 }
 const workerOnmessage = (e: MessageEvent) => {
     const message = e.data as typed.WorkerMessageResp
-    console.log(message)
     let result: THREE.Object3D<THREE.Object3DEventMap> | null = null
     if (message.mod == 'render') {
         var loader = new THREE.ObjectLoader()
@@ -41,6 +42,7 @@ const workerOnmessage = (e: MessageEvent) => {
         case 'top_copper':
             if (message.mod == 'render') {
                 pcbResult.Top.Copper = result as THREE.Object3D<THREE.Object3DEventMap>
+                progress.value[0] = 100
             }
             if (message.mod == 'renderProgress') {
                 progress.value[0] = message.data
@@ -50,6 +52,7 @@ const workerOnmessage = (e: MessageEvent) => {
         case 'btm_copper':
             if (message.mod == 'render') {
                 pcbResult.Btm.Copper = result as THREE.Object3D<THREE.Object3DEventMap>
+                progress.value[1] = 100
             }
             if (message.mod == 'renderProgress') {
                 progress.value[1] = message.data
@@ -58,6 +61,8 @@ const workerOnmessage = (e: MessageEvent) => {
         case 'outline':
             if (message.mod == 'render') {
                 pcbResult.OutLine = result as THREE.Group<THREE.Object3DEventMap>
+                progress.value[2] = 100
+
                 console.log(result?.children)
             }
             if (message.mod == 'renderProgress') {
@@ -67,6 +72,7 @@ const workerOnmessage = (e: MessageEvent) => {
         case 'top_silk':
             if (message.mod == 'render') {
                 pcbResult.Top.Silkscreen = result as THREE.Object3D<THREE.Object3DEventMap>
+                progress.value[3] = 100
             }
             if (message.mod == 'renderProgress') {
                 progress.value[3] = message.data
@@ -75,6 +81,7 @@ const workerOnmessage = (e: MessageEvent) => {
         case 'btm_silk':
             if (message.mod == 'render') {
                 pcbResult.Btm.Silkscreen = result as THREE.Object3D<THREE.Object3DEventMap>
+                progress.value[4] = 100
             }
             if (message.mod == 'renderProgress') {
                 progress.value[4] = message.data
@@ -83,6 +90,8 @@ const workerOnmessage = (e: MessageEvent) => {
         case 'top_mask':
             if (message.mod == 'render') {
                 pcbResult.Top.SolderMask = result as THREE.Object3D<THREE.Object3DEventMap>
+
+                progress.value[5] = 100
             }
             if (message.mod == 'renderProgress') {
                 progress.value[5] = message.data
@@ -91,6 +100,8 @@ const workerOnmessage = (e: MessageEvent) => {
         case 'btm_mask':
             if (message.mod == 'render') {
                 pcbResult.Btm.SolderMask = result as THREE.Object3D<THREE.Object3DEventMap>
+
+                progress.value[6] = 100
             }
             if (message.mod == 'renderProgress') {
                 progress.value[6] = message.data
@@ -99,6 +110,7 @@ const workerOnmessage = (e: MessageEvent) => {
         case 'top_paste':
             if (message.mod == 'render') {
                 pcbResult.Top.SolderPaste = result as THREE.Object3D<THREE.Object3DEventMap>
+                progress.value[7] = 100
             }
             if (message.mod == 'renderProgress') {
                 progress.value[7] = message.data
@@ -107,9 +119,22 @@ const workerOnmessage = (e: MessageEvent) => {
         case 'btm_paste':
             if (message.mod == 'render') {
                 pcbResult.Btm.SolderPaste = result as THREE.Object3D<THREE.Object3DEventMap>
+                progress.value[8] = 100
             }
             if (message.mod == 'renderProgress') {
                 progress.value[8] = message.data
+            }
+            break
+        case 'drill':
+            console.log('drill', message)
+            if (message.mod == 'render') {
+                const drill = result as THREE.Object3D<THREE.Object3DEventMap>
+                pcbResult.Drill = drill
+                renderer?.Scene.add(drill)
+                progress.value[9] = 100
+            }
+            if (message.mod == 'renderProgress') {
+                progress.value[9] = message.data
             }
             break
     }
@@ -149,9 +174,9 @@ const openGerber = async (event: Event) => {
     if (target.files && target.files.length > 0) {
         console.log('target.files', target.files)
         const res = await loadZip(target.files[0])
-        const plotResult = parseAndPlot(await loadZipFileData(target.files[0], res.Outline))
-        console.log(plotResult)
-        const renderResult = render(plotResult, defaultColor.BaseBoard, undefined, true)
+        // const plotResult = parseAndPlot(await loadZipFileData(target.files[0], res.Outline))
+        // console.log(plotResult)
+        // const renderResult = render(plotResult, defaultColor.BaseBoard, undefined, true)
         // console.log(renderResult.children[0].geometry)
         // const frontPoints = extractPointsAtZ(renderResult.children[0].geometry, 0.5)
         // const backPoints = extractPointsAtZ(renderResult.children[0].geometry,1);
@@ -161,17 +186,19 @@ const openGerber = async (event: Event) => {
         //     new THREE.MeshStandardMaterial({ color: 0xff0000 }),
         // )
 
-        renderer?.Scene.add(renderResult)
-        return
+        // renderer?.Scene.add(renderResult)
+        // return
         parserWorker[0].postMessage({
             mod: 'parseAndPlotAndRender',
             uuid: 'top_copper',
             data: await loadZipFileData(target.files[0], res.Top.Copper),
             opt: {
-                _color: defaultColor.Copper,
+                _color: 0x168039,
                 _progress: true,
                 thickness: 0.35,
+                outline: false,
             },
+            outline: false,
         } as typed.WorkerMessageParseAndPlotAndRender)
 
         parserWorker[1].postMessage({
@@ -183,6 +210,7 @@ const openGerber = async (event: Event) => {
                 _progress: true,
                 thickness: 0.35,
             },
+            outline: false,
         } as typed.WorkerMessageParseAndPlotAndRender)
 
         parserWorker[2].postMessage({
@@ -190,41 +218,50 @@ const openGerber = async (event: Event) => {
             uuid: 'top_silk',
             data: await loadZipFileData(target.files[0], res.Top.Silkscreen),
             opt: {
-                _color: 0x0055ff,
+                _color: defaultColor.Silkscreen,
                 _progress: true,
                 thickness: 0.35,
             },
+            outline: false,
         } as typed.WorkerMessageParseAndPlotAndRender)
         parserWorker[3].postMessage({
             mod: 'parseAndPlotAndRender',
             uuid: 'btm_silk',
             data: await loadZipFileData(target.files[0], res.Btm.Silkscreen),
             opt: {
-                _color: 0x0055ff,
+                _color: defaultColor.Silkscreen,
                 _progress: true,
                 thickness: 0.35,
             },
+            outline: false,
         } as typed.WorkerMessageParseAndPlotAndRender)
 
+        console.log(
+            'top_paste',
+            res.Top.SolderPaste,
+            await loadZipFileData(target.files[0], res.Top.SolderPaste),
+        )
         parserWorker[4].postMessage({
             mod: 'parseAndPlotAndRender',
             uuid: 'top_paste',
             data: await loadZipFileData(target.files[0], res.Top.SolderPaste),
             opt: {
-                _color: 0x0055ff,
+                _color: defaultColor.SolderPaste,
                 _progress: true,
                 thickness: 0.35,
             },
+            outline: false,
         } as typed.WorkerMessageParseAndPlotAndRender)
         parserWorker[4].postMessage({
             mod: 'parseAndPlotAndRender',
             uuid: 'btm_paste',
             data: await loadZipFileData(target.files[0], res.Btm.SolderPaste),
             opt: {
-                _color: 0x0055ff,
+                _color: defaultColor.SolderPaste,
                 _progress: true,
                 thickness: 0.35,
             },
+            outline: false,
         } as typed.WorkerMessageParseAndPlotAndRender)
 
         parserWorker[4].postMessage({
@@ -232,31 +269,59 @@ const openGerber = async (event: Event) => {
             uuid: 'top_mask',
             data: await loadZipFileData(target.files[0], res.Top.SolderMask),
             opt: {
-                _color: 0x0055ff,
+                _color: 0xc9a632,
                 _progress: true,
                 thickness: 0.35,
             },
+            outline: false,
         } as typed.WorkerMessageParseAndPlotAndRender)
         parserWorker[4].postMessage({
             mod: 'parseAndPlotAndRender',
             uuid: 'btm_mask',
             data: await loadZipFileData(target.files[0], res.Btm.SolderMask),
             opt: {
-                _color: 0x0055ff,
+                _color: defaultColor.SolderMask,
                 _progress: true,
                 thickness: 0.35,
             },
+            outline: false,
         } as typed.WorkerMessageParseAndPlotAndRender)
         parserWorker[4].postMessage({
             mod: 'parseAndPlotAndRender',
             uuid: 'outline',
             data: await loadZipFileData(target.files[0], res.Outline),
             opt: {
-                _color: 0xff00ff,
+                _color: defaultColor.BaseBoard,
                 _progress: true,
                 thickness: 0.35,
             },
+            outline: true,
         } as typed.WorkerMessageParseAndPlotAndRender)
+
+        // console.log('drill', res.Drill)
+        // let drillList: string[] = []
+        const element = await loadZipFileData(target.files[0], res.Drill[1])
+        // drillList.push(element)
+        console.log(element)
+        const plotre = plot(parse(element), true)
+        console.log('plotresult', plotre)
+
+        const modelres = renderSource(plotre, 0x222222, undefined, false)
+        // renderer?.Scene.add(modelres)
+        pcbResult.Drill = modelres
+
+        // console.log('drillList', drillList)
+
+        // parserWorker[5].postMessage({
+        //     mod: 'renderDrill',
+        //     uuid: 'drill',
+        //     data: drillList,
+        //     opt: {
+        //         _color: defaultColor.BaseBoard,
+        //         _progress: true,
+        //         thickness: 0.35,
+        //     },
+        // } as typed.WorkerMessagePlotAndRenderDrill)
         // const gerberData = parseAndPlot(outline)
         // console.log(gerberData.children[0])
         // console.log('res', gerberData)
@@ -272,7 +337,7 @@ const openGerber = async (event: Event) => {
         console.error('No file selected')
     }
 }
-const progress = ref([0, 0, 0, 0, 0, 0, 0, 0, 0])
+const progress = ref([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 </script>
 
 <template>

@@ -70,6 +70,7 @@ export function NewRenderByElement(el: HTMLDivElement, param: RenderInitParams):
     //环境光
     var ambient = new THREE.AmbientLight(0xffffff)
     scene.add(ambient)
+
     el.appendChild(renderer.domElement)
     return NewRenderByThreeInterface(scene, camera, renderer)
 }

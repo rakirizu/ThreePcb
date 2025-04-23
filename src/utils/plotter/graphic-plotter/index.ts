@@ -147,7 +147,6 @@ const GraphicPlotterPrototype: GraphicPlotterImpl = {
         }
 
         if (nextGraphicType === SLOT) {
-            console.log('nextGraphicType === SLOT')
             const slotPathGraphic = plotLine(plotSegment(location), tool)
 
             if (slotPathGraphic !== undefined) {
@@ -217,7 +216,6 @@ const GraphicPlotterPrototype: GraphicPlotterImpl = {
             nextGraphicType === SHAPE ||
             node.type === LOAD_POLARITY
         ) {
-            console.log('_plotCurrentPath', this._currentPath)
             const pathGraphic = plotContour(this._currentPath.segments)
 
             this._currentPath = undefined

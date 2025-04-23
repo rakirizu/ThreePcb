@@ -79,7 +79,7 @@ export const render = (
         geometry.translate(0, 0, -0.5)
         region.push(geometry)
     }
-    const material = new THREE.MeshStandardMaterial({
+    const material = new THREE.MeshBasicMaterial({
         color: _color,
     })
 

@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { parse } from './utils/parser'
 import { plot } from './utils/plotter'
 import { render } from './utils/render'
@@ -6,12 +7,15 @@ import {
     ModParse,
     ModParseAndPlotAndRender,
     ModPlot,
+    ModPlotAndRenderDrill,
     ModRender,
     ModRenderProgress,
     WorkerMessageParse,
     WorkerMessageParseAndPlotAndRender,
     WorkerMessageParseResp,
     WorkerMessagePlot,
+    WorkerMessagePlotAndRenderDrill,
+    WorkerMessagePlotAndRenderDrillResp,
     WorkerMessagePlotResp,
     WorkerMessageRender,
     WorkerMessageRenderProgressResp,
@@ -23,6 +27,7 @@ onmessage = (
         | WorkerMessagePlot
         | WorkerMessageRender
         | WorkerMessageParseAndPlotAndRender
+        | WorkerMessagePlotAndRenderDrill
     >
 ) => {
     switch (event.data.mod) {
@@ -55,7 +60,7 @@ onmessage = (
                 event.data.data,
                 event.data.opt._color,
                 progressRender,
-                event.data.opt.outline
+                event.data.outline
             )
             postMessage({
                 mod: ModRender,
@@ -79,7 +84,7 @@ onmessage = (
                 plotAndParse,
                 event.data.opt._color,
                 progressRender2,
-                event.data.opt.outline
+                event.data.outline
             )
             postMessage({
                 mod: ModRender,
@@ -87,6 +92,43 @@ onmessage = (
                 data: renderResult.toJSON(),
             } as WorkerMessageRenderResp)
             break
+        case ModPlotAndRenderDrill:
+            let progressRenderDrill: undefined | ((percent: number) => void) = undefined
+            let currentIndex = 0
+            const totalLength = event.data.data.length
+            const singleProgress = 1 / totalLength
+
+            if (event.data.opt._progress) {
+                progressRenderDrill = (percent: number) => {
+                    percent =
+                        ((percent / 100) * singleProgress + currentIndex * singleProgress) * 100
+                    postMessage({
+                        mod: ModRenderProgress,
+                        uuid: event.data.uuid,
+                        data: percent,
+                    } as WorkerMessageRenderProgressResp)
+                }
+            }
+            let group = new THREE.Group()
+            for (currentIndex = 0; currentIndex < event.data.data.length; currentIndex++) {
+                const element = event.data.data[currentIndex]
+                const plotAndParse = plot(parse(element), false)
+                const renderResult = render(
+                    plotAndParse,
+                    event.data.opt._color,
+                    progressRenderDrill,
+                    false
+                )
+                group.add(renderResult)
+            }
+            postMessage({
+                mod: ModPlotAndRenderDrill,
+                uuid: event.data.uuid,
+                data: group.toJSON(),
+            } as WorkerMessagePlotAndRenderDrillResp)
+
+            break
+
         default:
             console.warn('[ThreePCB] Invalid worker message', event.data)
     }

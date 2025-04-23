@@ -18,10 +18,10 @@ export interface colorSettings {
 }
 
 export const defaultColor: colorSettings = {
-    Copper: 0xe18a3b,
-    SolderMask: 0x6a8d52,
+    Copper: 0x2d7543,
+    SolderMask: 0x225933,
     SolderPaste: 0xb2b6b6,
-    Silkscreen: 0xffffff,
+    Silkscreen: 0xdddddd,
     BaseBoard: 0xbfa782,
 }
 export interface LaminarStructure {
