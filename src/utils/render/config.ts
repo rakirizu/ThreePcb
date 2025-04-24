@@ -38,7 +38,7 @@ export interface LaminarStructure {
 }
 export const DefaultLaminar: LaminarStructure = {
     Copper: 0.035,
-    SolderMask: 0.01,
+    SolderMask: 0.04,
     SolderPaste: 0.01,
     Total: 1.6,
     Silkscreen: 0.01,

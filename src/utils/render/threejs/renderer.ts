@@ -24,7 +24,9 @@ export interface RenderInitParams {
 export function NewRenderByElement(el: HTMLDivElement, param: RenderInitParams): Render {
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(0xeeeeee)
-    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    const renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true, antialias: true })
+    renderer.debug.checkShaderErrors = false
+
     renderer.setSize(el.clientWidth, el.clientHeight)
     // var width = el.clientWidth //窗口宽度
     // var height = el.clientHeight //窗口高度

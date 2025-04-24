@@ -112,7 +112,12 @@ onmessage = (
             let group = new THREE.Group()
             for (currentIndex = 0; currentIndex < event.data.data.length; currentIndex++) {
                 const element = event.data.data[currentIndex]
-                const plotAndParse = plot(parse(element), false)
+                const drillParseResult = parse(element)
+                console.log('drillParseResult', drillParseResult)
+                if (drillParseResult.filetype != 'drill') {
+                    continue
+                }
+                const plotAndParse = plot(drillParseResult, false)
                 const renderResult = render(
                     plotAndParse,
                     event.data.opt._color,

@@ -7,6 +7,8 @@ import {
     PLOT_CIRCLE,
     PLOT_POLYGON,
     PLOT_RECTANGLE,
+    PolygonShape,
+    Position,
     type CircleShape,
     type ImageShape,
     type LayeredShape,
@@ -74,7 +76,6 @@ const renderImageShapeRectangle = (shapeRectangle: RectangleShape): THREE.Buffer
     return geometry
 }
 const renderImageShapeOutline = (segments: PathArcSegment[]) => {
-    console.log('renderImageShapeOutline', segments)
     const geometry = new THREE.CylinderGeometry(segments[0].radius, segments[0].radius, 1)
     geometry.translate(segments[0].center[0], segments[0].center[1], 0)
     geometry.deleteAttribute('uv')
@@ -86,6 +87,31 @@ export interface renderImageShapeResult {
     type: typeof PLOT_CIRCLE | typeof PLOT_RECTANGLE | typeof PLOT_POLYGON | typeof OUTLINE
 }
 
+export const renderImageShapePolygon = (points: Position[]): THREE.BufferGeometry => {
+    const heartShape = new THREE.Shape()
+    if (points.length <= 2) {
+        console.warn('[ThreePCB] Invalid polygon points length (need 3):', points)
+        return new THREE.BufferGeometry()
+    }
+
+    heartShape.moveTo(points[0][0], points[0][1])
+    for (let index = 1; index < points.length; index++) {
+        const element = points[index]
+        if (element.length < 2) {
+            console.warn('[ThreePCB] Invalid segment data length (need 2):', element)
+            continue
+        }
+
+        heartShape.lineTo(element[0], element[1])
+        heartShape.moveTo(element[0], element[1])
+    }
+    heartShape.lineTo(points[0][0], points[0][1])
+    const geometry = new THREE.ExtrudeGeometry(heartShape, extrudeSettings)
+    geometry.deleteAttribute('uv')
+    geometry.translate(0, 0, extrudeSettings.depth ? -extrudeSettings.depth / 2 : -0.5)
+
+    return geometry
+}
 export const renderImageShape = (el: ImageShape): renderImageShapeResult[] => {
     let geometry: renderImageShapeResult[] = []
     switch (el.shape.type) {
@@ -123,34 +149,32 @@ export const renderImageShape = (el: ImageShape): renderImageShapeResult[] => {
                     console.warn('[ThreePCB] Invalid layered shape (erase):', shape)
                 }
                 switch (shape.type) {
-                    // case PLOT_CIRCLE:
-                    //     const shapeLayeredCircle = shape as CircleShape
-                    //     geometry.push({
-                    //         erase: false,
-                    //         geometry: renderImageShapeCircle(shapeLayeredCircle),
-                    //         type: shape.type,
-                    //     })
-                    //     break
-                    // case PLOT_RECTANGLE:
-                    //     const shapeLayeredRectangle = shape as RectangleShape
-                    //     geometry.push({
-                    //         erase: false,
-                    //         geometry: renderImageShapeRectangle(shapeLayeredRectangle),
-                    //         type: shape.type,
-                    //     })
-                    //     break
-                    // case PLOT_POLYGON:
-                    //     const shapeLayeredPolygon = shape as PolygonShape
-                    //     console.log('renderImageShapePolygon', shapeLayeredPolygon)
-                    //     geometry.push({
-                    //         erase: false,
-                    //         geometry: renderImageShapePolygon(shapeLayeredPolygon.points),
-                    //         type: shape.type,
-                    //     })
-                    //     break
+                    case PLOT_CIRCLE:
+                        const shapeLayeredCircle = shape as CircleShape
+                        geometry.push({
+                            erase: false,
+                            geometry: renderImageShapeCircle(shapeLayeredCircle),
+                            type: shape.type,
+                        })
+                        break
+                    case PLOT_RECTANGLE:
+                        const shapeLayeredRectangle = shape as RectangleShape
+                        geometry.push({
+                            erase: false,
+                            geometry: renderImageShapeRectangle(shapeLayeredRectangle),
+                            type: shape.type,
+                        })
+                        break
+                    case PLOT_POLYGON:
+                        const shapeLayeredPolygon = shape as PolygonShape
+                        geometry.push({
+                            erase: false,
+                            geometry: renderImageShapePolygon(shapeLayeredPolygon.points),
+                            type: shape.type,
+                        })
+                        break
                     case OUTLINE:
                         const shapeLayeredOutline = shape as OutlineShape
-                        console.log('renderImageShapeOutline', shapeLayeredOutline)
                         geometry.push({
                             erase: false,
                             geometry: renderImageShapeOutline(
@@ -159,9 +183,9 @@ export const renderImageShape = (el: ImageShape): renderImageShapeResult[] => {
                             type: 'polygon',
                         })
                         break
-                    // default:
-                    //     console.warn('[ThreePCB] Invalid shape type in layered shapes', shape)
-                    //     break
+                    default:
+                        console.warn('[ThreePCB] Invalid shape type in layered shapes', shape)
+                        break
                 }
             })
             break
