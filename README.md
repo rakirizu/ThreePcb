@@ -1,4 +1,4 @@
-# WebGerber
+# WebGerber | [简体中文](./README-CN.md)
 Printed circuit board visualization tools for JavaScript, fork from [tracespace/tracespace](https://github.com/tracespace/tracespace)
 
 ✨ Support SVG and [three.js](https://github.com/mrdoob/three.js)!
