@@ -28,7 +28,7 @@ const plot_result = plot(parse_result)
 ```
 ### 2. render
 #### 2.1. Render to svg
-Now, you can convert `plotResult` to svg
+Now, you can convert `plot_result` to svg
 > Notice: We use [syntax-tree/hast-util-to-html](https://github.com/syntax-tree/hast-util-to-html) convert svg tree to svg in html, you should install this first, such as `npm install hast-util-to-html` or `yarn add hast-util-to-html`
 ```TypeScript
 import { renderSVG } from 'web-gerber'
@@ -58,6 +58,12 @@ import { NewRenderByElement } from 'web-gerber'
 //you should provide dom to render, please refer to three.js doc for details.
 
 const el = document.getElementById('testThreeDom')  // make sure it's width and height!
+const parm: RenderInitParams = {
+    AddAnimationLoop: true,
+    AddAxesHelper: true,
+    AddOrbitControls: true,
+    AddResizeListener: true,
+}
 const three_pcb_render = NewRenderByElement(el, parm)
 ```
 
@@ -95,3 +101,25 @@ const pcb_struct = {
 assemblyPCBToThreeJS(three_pcb_render.Scene, pcb_struct, DefaultLaminar)
 ```
 If all goes well, you will see a beautiful PCB in three.js, good luck :)
+
+## Worker
+For large or complex PCB, the time required for rendering is usually very long, and web pages may become block, resulting in a poor user experience, worker can improved this problem.
+
+WebGerber Support rendering 3D by [Worker](https://developer.mozilla.org/en-US/docs/Web/API/Worker/Worker), You can use by:
+```Typescript
+import threeWorker from 'web-gerber/worker/runner?worker'
+const renderWorker = new threeWorker()
+```
+Of course, we support multiple workers:
+
+```typescript
+import threeWorker from 'web-gerber/worker/runner?worker'
+const renderWorker1 = new threeWorker()
+const renderWorker2 = new threeWorker()
+const renderWorker3 = new threeWorker()
+...
+```
+Now, you can `postMessage` to worker and receive `onmessage` from worker !
+
+> worker's documentwWait for the update. It will come soon...
+> star this project for support us!
