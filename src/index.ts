@@ -1,17 +1,7 @@
 // src\index.ts
-import { App } from 'vue'
-import ThreePCB from './components/ThreePCB.vue'
-
-export { ThreePCB } //实现按需引入*
-
-export default {
-  install(app: App) {
-    app.component('ThreePCB', ThreePCB) // 注册组件
-  },
-} // 批量的引入*
-
-declare module 'vue' {
-  export interface GlobalComponents {
-    ThreePCB: typeof ThreePCB
-  }
-}
+export * from './utils/identify-layers'
+export * from './utils/parser'
+export * from './utils/plotter'
+export * from './utils/renderSVG'
+export * from './utils/stats'
+export * from './utils/renderThree'

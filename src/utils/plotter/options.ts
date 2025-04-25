@@ -1,5 +1,5 @@
-import type { Format, GerberTree, UnitsType, ZeroSuppression } from '../parser'
-import { COMMENT, COORDINATE_FORMAT, GRAPHIC, IN, LEADING, TRAILING, UNITS } from '../parser'
+import type { GerberTree, UnitsType, Format, ZeroSuppression } from '../parser'
+import { UNITS, COORDINATE_FORMAT, GRAPHIC, COMMENT, LEADING, TRAILING, IN } from '../parser'
 
 export interface PlotOptions {
   units: UnitsType
@@ -10,7 +10,7 @@ export interface PlotOptions {
 const FORMAT_COMMENT_RE = /FORMAT={?(\d):(\d)/
 
 export function getPlotOptions(tree: GerberTree): PlotOptions {
-  const { children: treeNodes } = tree
+  const {children: treeNodes} = tree
   let units: UnitsType | undefined
   let coordinateFormat: Format | undefined
   let zeroSuppression: ZeroSuppression | undefined
@@ -18,7 +18,9 @@ export function getPlotOptions(tree: GerberTree): PlotOptions {
 
   while (
     index < treeNodes.length &&
-    (units === undefined || coordinateFormat === undefined || zeroSuppression === undefined)
+    (units === undefined ||
+      coordinateFormat === undefined ||
+      zeroSuppression === undefined)
   ) {
     const node = treeNodes[index]
 
@@ -35,12 +37,15 @@ export function getPlotOptions(tree: GerberTree): PlotOptions {
       }
 
       case GRAPHIC: {
-        const { coordinates } = node
+        const {coordinates} = node
 
         for (const coordinate of Object.values(coordinates)) {
           if (zeroSuppression !== undefined) break
 
-          if (coordinate?.endsWith('0') === true || coordinate?.includes('.') === true) {
+          if (
+            coordinate?.endsWith('0') === true ||
+            coordinate?.includes('.') === true
+          ) {
             zeroSuppression = LEADING
           } else if (coordinate?.startsWith('0') === true) {
             zeroSuppression = TRAILING
@@ -51,7 +56,7 @@ export function getPlotOptions(tree: GerberTree): PlotOptions {
       }
 
       case COMMENT: {
-        const { comment } = node
+        const {comment} = node
         const formatMatch = FORMAT_COMMENT_RE.exec(comment)
 
         if (/suppress trailing/i.test(comment)) {
