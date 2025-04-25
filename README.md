@@ -1,6 +1,9 @@
 # WebGerber
 Printed circuit board visualization tools for JavaScript, fork from [tracespace/tracespace](https://github.com/tracespace/tracespace)
 
+✨ Support SVG and [three.js](https://github.com/mrdoob/three.js)!
+
+![PCB](https://github.com/rakirizu/WebGerber/blob/main/img/pcb.png?raw=true)
 
 ## Install
 npm
