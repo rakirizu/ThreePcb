@@ -48,7 +48,7 @@ export const renderImagePath = (el: ImagePath): THREE.BufferGeometry[] => {
             } else if (element.type == ARC) {
                 curve = renderImagePathArc(element)
             } else {
-                console.warn('[ThreePCB] Invalid segment type:', element)
+                console.warn('[WebGerber] Invalid segment type:', element)
                 continue
             }
             const vectorPoints = curve.getPoints(50).map((p) => new THREE.Vector3(p.x, p.y, 0))

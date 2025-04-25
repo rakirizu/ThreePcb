@@ -90,7 +90,7 @@ export interface renderImageShapeResult {
 export const renderImageShapePolygon = (points: Position[]): THREE.BufferGeometry => {
     const heartShape = new THREE.Shape()
     if (points.length <= 2) {
-        console.warn('[ThreePCB] Invalid polygon points length (need 3):', points)
+        console.warn('[WebGerber] Invalid polygon points length (need 3):', points)
         return new THREE.BufferGeometry()
     }
 
@@ -98,7 +98,7 @@ export const renderImageShapePolygon = (points: Position[]): THREE.BufferGeometr
     for (let index = 1; index < points.length; index++) {
         const element = points[index]
         if (element.length < 2) {
-            console.warn('[ThreePCB] Invalid segment data length (need 2):', element)
+            console.warn('[WebGerber] Invalid segment data length (need 2):', element)
             continue
         }
 
@@ -146,7 +146,7 @@ export const renderImageShape = (el: ImageShape): renderImageShapeResult[] => {
             const shapeLayered = el.shape as LayeredShape
             shapeLayered.shapes.forEach((shape) => {
                 if (shape.erase) {
-                    console.warn('[ThreePCB] Invalid layered shape (erase):', shape)
+                    console.warn('[WebGerber] Invalid layered shape (erase):', shape)
                 }
                 switch (shape.type) {
                     case PLOT_CIRCLE:
@@ -184,13 +184,13 @@ export const renderImageShape = (el: ImageShape): renderImageShapeResult[] => {
                         })
                         break
                     default:
-                        console.warn('[ThreePCB] Invalid shape type in layered shapes', shape)
+                        console.warn('[WebGerber] Invalid shape type in layered shapes', shape)
                         break
                 }
             })
             break
         default:
-            console.warn('[ThreePCB] Invalid shape type:', el.shape.type, el)
+            console.warn('[WebGerber] Invalid shape type:', el.shape.type, el)
     }
 
     return geometry

@@ -17,7 +17,7 @@ export default defineConfig({
         outDir: 'dist/worker',
         lib: {
             entry: './src/worker.ts',
-            name: 'ThreePCB',
+            name: 'WebGerber',
             formats: ['es', 'cjs', 'umd'],
             fileName: (format, entryName) => {
                 switch (format) {

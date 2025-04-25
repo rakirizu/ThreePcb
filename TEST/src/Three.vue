@@ -1,18 +1,23 @@
 <script setup lang="ts">
 import * as THREE from 'three'
 import {
+    assemblyPCBToThreeJS,
     defaultColor,
     DefaultLaminar,
     NewRenderByElement,
+    NewRenderByThreeInterface,
     Render,
+    renderThree,
+    type PCBRender,
     type RenderInitParams,
-} from 'three-pcb'
-import threeWorker from 'three-pcb/worker/runner?worker'
-import * as typed from 'three-pcb/worker/types'
+} from 'web-gerber'
+import threeWorker from 'web-gerber/worker/runner?worker'
+import * as typed from 'web-gerber/worker/types'
 import { onMounted, ref, useTemplateRef } from 'vue'
 import { loadZip, loadZipFileData } from './utils/loadzip'
-import { renderPCBSvg } from './utils/svg'
+// import { renderPCBSvg } from './utils/svg'
 // import { renderPCBSvg, type PCBRender } from './utils/pcb'
+
 const threeDom = useTemplateRef('testThree')
 let renderer: Render | null = null
 const parserWorker = [
@@ -23,10 +28,10 @@ const parserWorker = [
     new threeWorker(),
     new threeWorker(),
 ]
-// let pcbResult: PCBRender = { Top: {}, Btm: {} } as PCBRender
+let pcbResult: PCBRender = { Top: {}, Btm: {} } as PCBRender
 const doAss = () => {
     if (renderer?.Scene) {
-        renderPCBSvg()
+        assemblyPCBToThreeJS(renderer.Scene, pcbResult, DefaultLaminar)
     }
 }
 const workerOnmessage = (e: MessageEvent) => {
@@ -163,8 +168,9 @@ onMounted(() => {
         console.error('threeDom is null')
         return
     } else {
+        
         renderer = NewRenderByElement(threeDom.value, parm)
-
+        
         console.log(renderer?.Camera)
     }
 })
@@ -175,6 +181,7 @@ const openGerber = async (event: Event) => {
         const res = await loadZip(target.files[0])
         // const plotResult = parseAndPlot(await loadZipFileData(target.files[0], res.Outline))
         // console.log(plotResult)
+       
         // const renderResult = render(plotResult, defaultColor.BaseBoard, undefined, true)
         // console.log(renderResult.children[0].geometry)
         // const frontPoints = extractPointsAtZ(renderResult.children[0].geometry, 0.5)
@@ -192,7 +199,7 @@ const openGerber = async (event: Event) => {
             uuid: 'top_copper',
             data: await loadZipFileData(target.files[0], res.Top.Copper),
             opt: {
-                _color: 0x168039,
+                _color: defaultColor.Copper,
                 _progress: true,
                 thickness: 0.35,
                 outline: false,
@@ -344,7 +351,7 @@ const progress = ref([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
         <!-- <button @click="openGerber">打开Gerber</button> -->
     </div>
     <div>
-        <button @click="doAss">组转</button>
+        <button @click="doAss">组装</button>
     </div>
     <div ref="testThree" style="width: 1000px; height: 1000px; background-color: white"></div>
 </template>

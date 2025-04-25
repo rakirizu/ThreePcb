@@ -9,7 +9,7 @@ import {
     TYPE_SILKSCREEN,
     TYPE_SOLDERMASK,
     TYPE_SOLDERPASTE,
-} from 'three-pcb'
+} from 'web-gerber'
 
 export const loadZip = async (file: File): Promise<GerberData> => {
     let GerberData: GerberData | null = {

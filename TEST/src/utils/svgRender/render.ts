@@ -7,7 +7,7 @@ import type {
     ImageShape,
     PathSegment,
     Shape,
-} from 'three-pcb'
+} from 'web-gerber'
 import {
     BoundingBox,
     CIRCLE,
@@ -19,7 +19,7 @@ import {
     POLYGON,
     positionsEqual,
     RECTANGLE,
-} from 'three-pcb'
+} from 'web-gerber'
 
 import { random } from './random'
 import type { SvgElement } from './types'

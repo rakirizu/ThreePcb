@@ -17,7 +17,7 @@ export default defineConfig({
         outDir: 'dist/utils',
         lib: {
             entry: './src/index.ts',
-            name: 'ThreePCB',
+            name: 'WebGerber',
             formats: ['es', 'cjs', 'umd'],
             fileName: (format, entryName) => {
                 switch (format) {
@@ -39,7 +39,7 @@ export default defineConfig({
             output: {
                 exports: 'named',
                 globals: {
-                    ThreePCB: 'ThreePCB',
+                    WebGerber: 'WebGerber',
                 },
             },
         },

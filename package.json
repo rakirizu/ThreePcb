@@ -1,7 +1,7 @@
 {
-    "name": "three-pcb",
+    "name": "web-gerber",
     "private": false,
-    "version": "0.0.3",
+    "version": "1.0.0",
     "type": "module",
     "main": "dist/utils/index.cjs",
     "module": "dist/utils/index.es.mjs",
@@ -12,12 +12,31 @@
         "README.md",
         "dist"
     ],
-    "author": "Kirizu <kirizu@kirizu.dev>",
-    "license": "MIT",
     "scripts": {
         "dev": "vite",
         "build": "vite build --config vite.index.config.ts && vite build --config vite.worker.config.ts",
         "preview": "vite preview"
+    },
+    "author": "Kirizu <kirizu@kirizu.dev>",
+    "description": "PCB Gerber parser, render in three.js or save to svg in browser | 在浏览器中解析PCB Gerber文件，支持渲染到Three.js或保存为svg文件",
+    "license": "Apache-2.0",
+    "keywords": [
+        "gerber",
+        "threejs",
+        "svg",
+        "pcb",
+        "web",
+        "hardware",
+        "parser",
+        "renderer"
+    ],
+    "bugs": {
+        "url": "https://github.com/rakirizu/WebGerber/issues",
+        "email": "kirizu@kirizu.dev"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/rakirizu/WebGerber.git"
     },
     "exports": {
         ".": {
@@ -33,6 +52,7 @@
     },
     "dependencies": {
         "@types/three": "^0.175.0",
+        "hastscript": "^9.0.1",
         "moo": "^0.5.2",
         "testdouble": "^3.20.2",
         "testdouble-vitest": "^0.3.0",

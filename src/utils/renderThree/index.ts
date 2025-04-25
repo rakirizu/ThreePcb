@@ -17,11 +17,12 @@ import { renderImageRegion } from './region'
 import { renderImageShape } from './shape'
 export * from './config'
 export * from './path'
+export * from './pcb'
 export * from './region'
+export * from './renderer'
 export * from './shape'
-export * from './threejs'
 // let reNum = 0
-export const render = (
+export const renderThree = (
     gerberData: ImageTree,
     _color: THREE.ColorRepresentation,
     _progress: (number: number) => void = () => {},

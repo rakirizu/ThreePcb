@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { parse } from './utils/parser'
 import { plot } from './utils/plotter'
-import { render } from './utils/render'
+import { renderThree as render } from './utils/renderThree'
 
 import {
     ModParse,
@@ -135,6 +135,6 @@ onmessage = (
             break
 
         default:
-            console.warn('[ThreePCB] Invalid worker message', event.data)
+            console.warn('[WebGerber] Invalid worker message', event.data)
     }
 }

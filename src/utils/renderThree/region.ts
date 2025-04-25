@@ -8,7 +8,7 @@ export const renderImageRegion = (el: ImageRegion): THREE.BufferGeometry | null 
         const element = el.segments[index]
 
         if (element.start.length < 2 || element.end.length < 2) {
-            console.warn('[ThreePCB] Invalid segment data length (need 2):', element)
+            console.warn('[WebGerber] Invalid segment data length (need 2):', element)
             continue
         }
 
@@ -25,7 +25,7 @@ export const renderImageRegion = (el: ImageRegion): THREE.BufferGeometry | null 
         } else if (element.type == PLOT_LINE) {
             heartShape.lineTo(element.end[0], element.end[1])
         } else {
-            console.warn('[Three-PCB] invalid region type', element)
+            console.warn('[WebGerber] invalid region type', element)
         }
     }
     // const spline = createRoundedPath(vectorPoints, 3)

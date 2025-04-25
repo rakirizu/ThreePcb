@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { LaminarStructure } from '../config'
+import { LaminarStructure } from './config'
 export interface PCBRender {
     Top: LayerStruct
     Btm: LayerStruct
@@ -9,21 +9,21 @@ export interface PCBRender {
 export interface LayerStruct {
     Copper: THREE.Object3D
     SolderMask: THREE.Object3D
-    SolderPaste: THREE.Object3D
     Silkscreen: THREE.Object3D
 }
 
 export const assemblyPCBToThreeJS = (
     scene: THREE.Scene,
     _pcb: PCBRender,
-    thicknessConfig: LaminarStructure
+    thicknessConfig: LaminarStructure,
+    oilColor: number = 0x225933
 ) => {
     const mainBoardThickness =
         thicknessConfig.Total -
         thicknessConfig.Copper * 2 -
         thicknessConfig.Silkscreen * 2 -
         thicknessConfig.SolderMask * 2 -
-        thicknessConfig.SolderPaste * 2
+        thicknessConfig.Oil * 2
     console.log('mainBoardThickness', mainBoardThickness)
 
     _pcb.OutLine.scale.setZ(mainBoardThickness)
@@ -34,9 +34,6 @@ export const assemblyPCBToThreeJS = (
     _pcb.Top.SolderMask?.scale.setZ(thicknessConfig.SolderMask)
     _pcb.Btm.SolderMask?.scale.setZ(thicknessConfig.SolderMask)
 
-    _pcb.Top.SolderPaste?.scale.setZ(thicknessConfig.SolderPaste)
-    _pcb.Btm.SolderPaste?.scale.setZ(thicknessConfig.SolderPaste)
-
     _pcb.Top.Silkscreen?.scale.setZ(thicknessConfig.Silkscreen)
     _pcb.Btm.Silkscreen?.scale.setZ(thicknessConfig.Silkscreen)
 
@@ -46,20 +43,20 @@ export const assemblyPCBToThreeJS = (
 
     //绿油层
     const oilModel = _pcb.OutLine.clone()
-    oilModel.scale.setZ(thicknessConfig.SolderPaste)
-    oilModel.position.setZ(halfMainBoardThickness + thicknessConfig.SolderPaste / 2)
+    oilModel.scale.setZ(thicknessConfig.Oil)
+    oilModel.position.setZ(halfMainBoardThickness + thicknessConfig.Oil / 2)
     //@ts-ignore
     oilModel.children[0].material = new THREE.MeshBasicMaterial({
-        color: 0x225933,
+        color: oilColor,
     })
 
     _pcb.Top.Copper.position.setZ(
-        halfMainBoardThickness + thicknessConfig.SolderPaste + thicknessConfig.Copper / 2
+        halfMainBoardThickness + thicknessConfig.Oil + thicknessConfig.Copper / 2
     )
 
     _pcb.Top.SolderMask.position.setZ(
         halfMainBoardThickness +
-            thicknessConfig.SolderPaste +
+            thicknessConfig.Oil +
             thicknessConfig.Copper +
             thicknessConfig.SolderMask / 2
     )
@@ -67,26 +64,26 @@ export const assemblyPCBToThreeJS = (
     _pcb.Top.Silkscreen.position.setZ(
         halfMainBoardThickness +
             thicknessConfig.Copper +
-            thicknessConfig.SolderPaste +
+            thicknessConfig.Oil +
             thicknessConfig.SolderMask +
             thicknessConfig.Silkscreen / 2
     )
 
     const oilBtmModel = _pcb.OutLine.clone()
-    oilBtmModel.scale.setZ(thicknessConfig.SolderPaste)
-    oilBtmModel.position.setZ(-halfMainBoardThickness - thicknessConfig.SolderPaste / 2)
+    oilBtmModel.scale.setZ(thicknessConfig.Oil)
+    oilBtmModel.position.setZ(-halfMainBoardThickness - thicknessConfig.Oil / 2)
     //@ts-ignore
     oilBtmModel.children[0].material = new THREE.MeshBasicMaterial({
-        color: 0x225933,
+        color: oilColor,
     })
 
     _pcb.Btm.Copper.position.setZ(
-        -halfMainBoardThickness - thicknessConfig.SolderPaste - thicknessConfig.Copper / 2
+        -halfMainBoardThickness - thicknessConfig.Oil - thicknessConfig.Copper / 2
     )
 
     _pcb.Btm.SolderMask.position.setZ(
         -halfMainBoardThickness -
-            thicknessConfig.SolderPaste -
+            thicknessConfig.Oil -
             thicknessConfig.Copper -
             thicknessConfig.SolderMask / 2
     )
@@ -94,7 +91,7 @@ export const assemblyPCBToThreeJS = (
     _pcb.Btm.Silkscreen.position.setZ(
         -halfMainBoardThickness -
             thicknessConfig.Copper -
-            thicknessConfig.SolderPaste -
+            thicknessConfig.Oil -
             thicknessConfig.SolderMask -
             thicknessConfig.Silkscreen / 2
     )

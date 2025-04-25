@@ -1,7 +1,7 @@
 import { s } from 'hastscript'
 
-import type { ImageTree, SizeEnvelope } from 'three-pcb'
-import { BoundingBox } from 'three-pcb'
+import type { ImageTree, SizeEnvelope } from 'web-gerber'
+import { BoundingBox } from 'web-gerber'
 
 import { renderGraphic } from './render'
 import type { SvgElement, ViewBox } from './types'
